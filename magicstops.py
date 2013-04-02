@@ -7,7 +7,7 @@ import sys
 from hsaudiotag import ogg, mpeg
 
 import synctools
-from synctools.simfile import Simfile
+from simfile import Simfile
 
 # TODO: separate these functions and variables
 unround_values = {

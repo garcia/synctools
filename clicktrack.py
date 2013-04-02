@@ -9,7 +9,7 @@ import wave
 from hsaudiotag import ogg, mpeg
 
 import synctools
-from synctools.simfile import *
+from simfile import *
 
 __all__ = ['clicktrack']
 
