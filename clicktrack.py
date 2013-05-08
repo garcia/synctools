@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from fractions import Fraction
 import logging
 import math
 import os
@@ -48,7 +49,7 @@ def get_hardest_chart(simfile):
                                          stepstype=(game + '-' + sd))
                     log.info('Using %s-%s %s chart' % (game, sd, diff))
                     return chart
-                except (MultiInstanceError, NoChartError):
+                except (MultiInstanceError, KeyError):
                     pass
 
 
@@ -61,21 +62,13 @@ def unround(number):
         return float(number)
 
 
-def parse_timing_data(data):
-    output = dict()
-    if not data.strip(): return output
-    for pair in [line.strip().split('=') for line in data.strip().split(',')]:
-        output[unround(pair[0])] = float(pair[1])
-    return output
-
-
 def clicktrack(simfile):
     log = logging.getLogger('synctools')
     cfg = synctools.get_config()
     # Retrieve the needed data
     musicfile = simfile.get('MUSIC')[1]
-    bpms = simfile.get('BPMS')[1]
-    stops = simfile.get('STOPS')[1]
+    bpms = dict(simfile.get('BPMS')[1])
+    stops = dict(simfile.get('STOPS')[1])
     offset = float(simfile.get('OFFSET')[1]) + cfg['synctools']['global_offset']
     # Retrieve the hardest chart, if possible
     chart = get_hardest_chart(simfile)
@@ -84,25 +77,20 @@ def clicktrack(simfile):
         # Get whatever the first chart is
         try:
             chart = simfile.get_chart(index=0)
-            log.info('Using %s %s chart' % (chart['stepstype'],
-                                          chart['difficulty']))
+            log.info('Using %s %s chart' % (chart.stepstype,
+                                          chart.difficulty))
         except NoChartError:
             log.error('This simfile does not have any charts; aborting')
             return
     # Generate click track
     clicks = []
-    for (m, measure) in enumerate(chart['notes']):
-        for (l, line) in enumerate(measure):
-            line_pos = 4 * (m + float(l) / len(measure))
-            if any([c in '124' for c in line]) and \
-                cfg['clicktrack']['taps']:
-                clicks.append((line_pos, 'tap'))
-            if any([c == 'M' for c in line]) and \
-                cfg['clicktrack']['mines']:
-                clicks.append((line_pos, 'mine'))
-            if not l % (len(measure) / 4) and \
-                cfg['clicktrack']['metronome']:
-                clicks.append((line_pos, 'metronome'))
+    for t, line in chart.notes.notes:
+        if any([c in '124' for c in line]) and cfg['clicktrack']['taps']:
+            clicks.append((t, 'tap'))
+        if any([c == 'M' for c in line]) and cfg['clicktrack']['mines']:
+            clicks.append((t, 'mine'))
+        if not t % 1 and cfg['clicktrack']['metronome']:
+            clicks.append((t, 'metronome'))
     log.debug('%s clicks loaded' % len(clicks))
     # Get the necessary metadata from the music file
     musicpath = simfile.dirname + os.sep + musicfile
@@ -131,9 +119,7 @@ def clicktrack(simfile):
         samples = audio_length
     log.debug("%s fps, ~%s samples long" % (sample_rate, audio_length))
     # Process BPM data
-    bpms = parse_timing_data(bpms)
-    bpms[len(chart['notes']) * 4] = bpms[max(bpms.keys())]
-    stops = parse_timing_data(stops)
+    bpms[max(n[0] for n in chart.notes.notes)] = bpms[max(bpms.keys())]
     beats = [(offset * -sample_rate, 'first_beat')] # first beat
     # residue: samples between beat and end of bpm change
     residue = 0
@@ -144,12 +130,12 @@ def clicktrack(simfile):
         bpm_start = min(bpms.keys())
         bpm_value = bpms.pop(bpm_start)
         bpm_end = min(bpms.keys())
-        beat_length = 60. / bpm_value * sample_rate
+        beat_length = 60 / bpm_value * sample_rate
         while current_click <= bpm_end:
             # add stop value(s) to residue
             while len(stops) and min(stops.keys()) < current_click:
                 residue += stops.pop(min(stops.keys())) * sample_rate
-            beats.append((beats[-1][0] + beat_length * 
+            beats.append((beats[-1][0] + Fraction(beat_length) * 
                          (current_click - cursor) + 
                          residue, click_type))
             cursor = current_click
@@ -159,7 +145,7 @@ def clicktrack(simfile):
                 break
             residue = 0
         # residue will remain 0 if bpm_end is on a whole beat
-        residue += (bpm_end - cursor) * beat_length
+        residue += (bpm_end - cursor) * Fraction(beat_length)
         cursor = bpm_end
     # Generate some sounds
     amp = cfg['clicktrack']['amplitude']
