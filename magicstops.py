@@ -7,48 +7,7 @@ import sys
 from hsaudiotag import ogg, mpeg
 
 import synctools
-from simfile import Simfile
-
-# TODO: separate these functions and variables
-unround_values = {
-    # thirds
-    333: 1. / 3,
-    667: 2. / 3,
-    # sixths
-    167: 1. / 6,
-    833: 5. / 6,
-    # twelfths
-     83: 1. / 12,
-    417: 5. / 12,
-    583: 7. / 12,
-    917: 11. / 12,
-    # sixteenths
-     63: 1. / 16,
-    188: 3. / 16,
-    313: 5. / 16,
-    438: 7. / 16,
-    563: 9. / 16,
-    688: 11. / 16,
-    813: 13. / 16,
-    938: 15. / 16
-}
-
-
-def unround(number):
-    global unround_values
-    n = [int(part) for part in number.split('.')]
-    if n[1] in unround_values:
-        return n[0] + unround_values[n[1]]
-    else:
-        return float(number)
-
-
-def parse_timing_data(data):
-    output = dict()
-    if not data.strip(): return output
-    for pair in [line.strip().split('=') for line in data.strip().split(',')]:
-        output[unround(pair[0])] = float(pair[1])
-    return output
+from simfile import *
 
 
 def magicstops(simfile):
@@ -58,23 +17,18 @@ def magicstops(simfile):
     # Retrieve the needed data
     bpms = simfile.get('BPMS')[1]
     stops = simfile.get('STOPS')[1]
-    # Process BPM data
-    bpms = parse_timing_data(bpms)
-    stops = parse_timing_data(stops)
     # Fix stop values
     # 'residue' contains the number of seconds by which the chart is early
     drift = 0
     residue = 0.0
     new_stops = []
     while stops:
-        stop_start = min(stops.iterkeys())
-        stop_value = stops.pop(stop_start)
+        stop_start, stop_value = (float(s) for s in stops.pop(0))
         # Get current BPM
         bpm_start = 0.0
-        for bpm_s, bpm_v in bpms.iteritems():
+        for bpm_s, bpm_v in bpms:
             if bpm_s > bpm_start and bpm_s <= stop_start:
-                bpm_start = bpm_s
-        bpm_value = bpms[bpm_start]
+                bpm_start, bpm_value = float(bpm_s), float(bpm_v)
         # Really big BPM values should be decreased until they're reasonable
         while bpm_value > 625:
             bpm_value /= 2
@@ -106,12 +60,10 @@ def magicstops(simfile):
             log.warn('Could not correct stop at %s' % stop_start)
         new_stops.append((round(stop_start, 3), stop_value))
     # Reassemble stops data
-    new_stops = ',\n'.join(['%s=%s' % new_stop for new_stop in new_stops])
-    with codecs.open(simfile.filename, 'w', 'utf-8') as output:
-        for param in simfile.params:
-            if param[0].upper() == 'STOPS':
-                param[1] = new_stops
-            output.write(unicode(param) + '\n')
+    simfile.get('STOPS')[1] = Timing(','.join(
+        ['%s=%s' % new_stop for new_stop in new_stops]
+    ))
+    simfile.save()
     log.info('Corrected about %s milliseconds of drift' % abs(drift))
 
 if __name__ == '__main__':

@@ -134,7 +134,7 @@ def clicktrack(simfile):
         while current_click <= bpm_end:
             # add stop value(s) to residue
             while len(stops) and min(stops.keys()) < current_click:
-                residue += stops.pop(min(stops.keys())) * sample_rate
+                residue += Fraction(stops.pop(min(stops.keys())) * sample_rate)
             beats.append((beats[-1][0] + Fraction(beat_length) * 
                          (current_click - cursor) + 
                          residue, click_type))
