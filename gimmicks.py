@@ -31,9 +31,12 @@ def gimmicks(simfile):
     with open(gpath, 'r') as gfile:
         g = yaml.load(gfile, Loader=Loader)
     
+    # Ensure the BPM is a float, not an integer
+    g['bpm'] = float(g['bpm'])
+    
     # Convert each gimmick line into a set of BPMs and stops.
     t = {
-        'bpms': {0: float(g['bpm'])},
+        'bpms': {0: g['bpm']},
         'stops': {},
     }
     gimmicks = sorted(g['gimmicks'].iteritems(), key=(lambda t: t[0].split('-')[0]))
