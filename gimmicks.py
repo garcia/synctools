@@ -39,13 +39,28 @@ def gimmicks(simfile):
         'bpms': {0: g['bpm']},
         'stops': {},
     }
-    gimmicks = sorted(g['gimmicks'].iteritems(), key=(lambda t: t[0].split('-')[0]))
-    for beats, gimmick in gimmicks:
-        start, stop = (float(b) for b in beats.split('-'))
-        full_length = stop - start
+    gimmicks = sorted(((str(a), str(b)) for a, b in g['gimmicks'].iteritems()),
+                      key=(lambda t: str(t[0]).split('-')[0]))
+    for i, (beats, gimmick) in enumerate(gimmicks):
+        # Split the gimmick into its segments
         length, mul, name = gimmick.split()
         length = float(Fraction(length)) * 4
         mul = float(Fraction(mul.rstrip('x')))
+        if '-' in beats:
+            # beats defined as "start-stop"
+            start, stop = beats.split('-')
+            start = float(start)
+            if not stop:
+                # beats defined as "start-"; stop when the next gimmick starts
+                if i + 1 == len(gimmicks):
+                    raise ValueError("can't end with an indefinite gimmick")
+                stop = gimmicks[i + 1][0].split('-')[0]
+            stop = float(stop)
+        else:
+            # beats defined as "start"; stop after one iteration
+            start = float(beats)
+            stop = start + length
+        full_length = stop - start
         
         if 'definitions' in g and name in g['definitions']:
             definition = g['definitions'][name]
