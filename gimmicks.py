@@ -18,6 +18,9 @@ import synctools
 
 __all__ = ['gimmicks']
 
+
+
+
 def gimmicks(simfile):
     log = logging.getLogger('synctools')
     cfg = synctools.get_config()
@@ -82,8 +85,39 @@ def gimmicks(simfile):
     simfile.save()
 
 
-with open('builtin_gimmicks.txt', 'r') as bgfile:
-        builtin_gimmicks = yaml.load(bgfile, Loader=Loader)
+builtin_gimmicks = yaml.load("""
+stutter:
+    bpms:
+        0: bpm * mul
+    stops:
+        0: 60 / (bpm * mul) * ((mul - 1) * len)
+
+midstutter:
+    bpms:
+        0: bpm * mul
+    stops:
+        0.5: 60 / (bpm * mul) * ((mul - 1) * len)
+
+halfbrake:
+    bpms:
+        0: bpm * mul
+        0.5: bpm / ((mul - .5) * (2 / mul))
+
+quarterbrake:
+    bpms:
+        0: bpm * mul
+        0.75: bpm / ((mul - .75) * (4 / mul))
+
+halfboost:
+    bpms:
+        0: bpm / ((mul - .5) * (2 / mul))
+        0.5: bpm * mul
+
+quarterboost:
+    bpms:
+        0: bpm / ((mul - .75) * (4 / mul))
+        0.25: bpm * mul
+""", Loader=Loader)
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
