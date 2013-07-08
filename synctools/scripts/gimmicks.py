@@ -78,7 +78,7 @@ def parse_gimmick(g, t, gimmicks, gimmick, nextgimmick):
         raise ValueError("%s is not of the form 'length mul name'")
     length = float(Fraction(length)) * 4
     mul = float(Fraction(mul.rstrip('x')))
-    start, stop = parse_beats(beats, nextgimmick[0], length)
+    start, stop = parse_beats(beats, nextgimmick[0] if nextgimmick else None, length)
     full_length = stop - start
     
     if 'definitions' in g and name in g['definitions']:

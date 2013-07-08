@@ -49,7 +49,7 @@ def get_hardest_chart(simfile):
                                          stepstype=(game + '-' + sd))
                     log.info('Using %s-%s %s chart' % (game, sd, diff))
                     return chart
-                except (MultiInstanceError, KeyError):
+                except KeyError:
                     pass
 
 
