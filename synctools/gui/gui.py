@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import glob
 import os
 import urllib
@@ -8,13 +7,13 @@ pygtk.require('2.0')
 import gtk
 import gtk.glade
 
-from simfile.msd import MSDParser
+from synctools import scripts
 
 class SynctoolsGUI:
     
     file_uri_target = 80
     path_strip = '\r\n\x00'
-    gladefile = 'synctools.glade'
+    gladefile = os.path.join(os.path.dirname(__file__), 'synctools.glade')
     
     def delete_event(self, widget, event, data=None):
         gtk.main_quit()
@@ -30,23 +29,12 @@ class SynctoolsGUI:
         path = path.strip(SynctoolsGUI.path_strip)
         return path
     
-    def discover_simfiles(self, path):
-        if os.path.isfile(path):
-            if os.path.splitext(path)[1] == '.sm':
-                return [path]
-        elif os.path.isdir(path):
-            paths = []
-            for child in glob.iglob(os.path.join(path, '*')):
-                paths.extend(self.discover_simfiles(child))
-            return paths
-        return []
-    
     def drag_files(self, widget, context, x, y, selection, target_type, timestamp):
         if target_type == SynctoolsGUI.file_uri_target:
             uris = selection.data.strip(SynctoolsGUI.path_strip)
             simfiles = []
             for uri in uris.split():
-                simfiles.extend(self.discover_simfiles(self.get_path(uri)))
+                simfiles.extend(scripts.find_simfiles(self.get_path(uri)))
             for simfile in simfiles:
                 print simfile
     
@@ -67,8 +55,3 @@ class SynctoolsGUI:
     
     def main(self):
         gtk.main()
-
-
-if __name__ == "__main__":
-   gui = SynctoolsGUI()
-   gui.main()
