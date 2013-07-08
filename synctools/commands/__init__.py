@@ -1,4 +1,4 @@
-from scripts import *
+from commands import *
 
 import logging
 log = logging.getLogger('synctools')

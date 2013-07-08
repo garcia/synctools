@@ -7,7 +7,7 @@ pygtk.require('2.0')
 import gtk
 import gtk.glade
 
-from synctools import scripts
+from synctools import commands
 
 class SynctoolsGUI:
     
@@ -34,7 +34,7 @@ class SynctoolsGUI:
             uris = selection.data.strip(SynctoolsGUI.path_strip)
             simfiles = []
             for uri in uris.split():
-                simfiles.extend(scripts.find_simfiles(self.get_path(uri)))
+                simfiles.extend(commands.find_simfiles(self.get_path(uri)))
             for simfile in simfiles:
                 print simfile
     

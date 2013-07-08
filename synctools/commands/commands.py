@@ -9,7 +9,7 @@ import traceback
 
 from simfile import Simfile
 
-__all__ = ['SynctoolsCommand', 'find_simfiles', 'main', 'common_fields']
+__all__ = ['SynctoolsCommand', 'InputTypes', 'find_simfiles', 'main', 'common_fields']
 
 
 class SynctoolsCommand(object):
@@ -31,6 +31,10 @@ class SynctoolsCommand(object):
     
     def done(self):
         pass
+
+
+class InputTypes(object):
+    text, boolean = xrange(2)
 
 
 def find_simfiles(path):
@@ -65,16 +69,13 @@ def main(Command):
     for field in Command.fields:
         while True:
             # Determine default value to show in brackets
-            if field['input'] == 'checkbox':
-                if field['default']:
-                    default = 'Y/n'
-                else:
-                    default = 'y/N'
+            if field['input'] == InputTypes.boolean:
+                default_string = 'Y/n' if field['default'] else 'y/N'
             else:
-                default = field['default']
-            # 
+                default_string = field['default']
+            # Get option value from user
             value = raw_input('{title} [{default}]: '.format(
-                title=field['title'], default=default))
+                title=field['title'], default=default_string))
             if not value:
                 options[field['name']] = field['default']
                 break
@@ -98,14 +99,14 @@ common_fields = {
     'backup': {
         'name': 'backup',
         'title': 'Backup simfiles?',
-        'input': 'checkbox',
+        'input': InputTypes.boolean,
         'default': True,
         'type': yesno,
     },
     'globaloffset': {
         'name': 'globaloffset',
         'title': 'Global offset',
-        'input': 'text',
+        'input': InputTypes.text,
         'default': '0.000',
         'type': Decimal,
     },
