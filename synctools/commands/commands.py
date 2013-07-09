@@ -140,33 +140,3 @@ common_fields = {
         'type': Decimal,
     },
 }
-
-
-# This is no longer used, but remains for future reference
-config_structure = {
-    'formatter': {
-        'in_file': str,
-        'out_file': str,
-    },
-    'magicstops': {
-        'margin': float,
-    },
-    'rename': {
-        'keep_other_files': bool,
-        'directory': str,
-        'simfile': str,
-        'music': str,
-        'background': str,
-        'banner': str,
-        'cdtitle': str,
-        'lyricspath': str,
-    },
-    'resynthesize': {
-        'input': str,
-        'output': str,
-    },
-    'patch': {
-        'backup': bool,
-        'patched_length': int,
-    },
-}
