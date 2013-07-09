@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-import codecs
 from decimal import *
-import logging
-import os
-import sys
 
 import commands
 

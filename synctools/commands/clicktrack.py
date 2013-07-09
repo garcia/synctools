@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 from decimal import Decimal
-from fractions import Fraction
-import logging
 import math
 import os
 import random
@@ -10,8 +8,6 @@ import wave
 import commands
 
 __all__ = ['Clicktrack']
-
-sample_rate = 44100
 
 class Clicktrack(commands.SynctoolsCommand):
     
@@ -47,6 +43,8 @@ class Clicktrack(commands.SynctoolsCommand):
         },
         commands.common_fields['global_offset'],
     ]
+    
+    sample_rate = 44100
     
     def __init__(self, options):
         super(Clicktrack, self).__init__(options)
@@ -155,16 +153,16 @@ class Clicktrack(commands.SynctoolsCommand):
         
         # Write click track to memory buffer
         self.log.info('Generating click track')
-        buffer = bytearray('\x80' * int(sample_rate * audio_length))
+        buffer = bytearray('\x80' * int(self.sample_rate * audio_length))
         last_beat = second = 0
         for beat, sound in clicks:
             second += self.seconds_between_beats(last_beat, beat)
-            sample = int(second * sample_rate)
+            sample = int(second * self.sample_rate)
             buffer[sample:sample+1024] = self.sound[sound]
             last_beat = beat
         
         # Compensate for offset
-        offset_samples = int(offset * sample_rate)
+        offset_samples = int(offset * self.sample_rate)
         if offset_samples > 0:
             del buffer[:offset_samples]
         elif offset_samples < 0:
@@ -176,7 +174,7 @@ class Clicktrack(commands.SynctoolsCommand):
         clicks_h = wave.open(wav, 'w')
         clicks_h.setnchannels(1)
         clicks_h.setsampwidth(1)
-        clicks_h.setframerate(sample_rate)
+        clicks_h.setframerate(self.sample_rate)
         clicks_h.writeframes(str(buffer))
         clicks_h.close()
         self.log.info('Done.')
