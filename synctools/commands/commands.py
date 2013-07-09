@@ -9,7 +9,8 @@ import traceback
 
 from simfile import Simfile
 
-__all__ = ['SynctoolsCommand', 'InputTypes', 'find_simfiles', 'main', 'common_fields']
+__all__ = ['SynctoolsCommand', 'FieldInputs', 'FieldTypes', 'find_simfiles',
+           'main', 'common_fields']
 
 
 class SynctoolsCommand(object):
@@ -54,12 +55,12 @@ class FieldTypes(object):
             raise TypeError('expecting a string or boolean')
     
     @staticmethod
-    def float_between(start, end):
-        def _float_between(value):
-            value = float(value)
+    def between(start, end, number_type=int):
+        def _between(value):
+            value = number_type(value)
             assert start <= value <= end, "%s <= value <= %s" % (start, end)
             return value
-        return _float_between
+        return _between
 
 
 def find_simfiles(path):
@@ -89,6 +90,10 @@ def yesno(value):
 
 
 def main(Command):
+    # Set up logging
+    log = logging.getLogger('synctools')
+    log.setLevel(logging.INFO)
+    log.addHandler(logging.StreamHandler())
     # Get options from command line
     options = {}
     for field in Command.fields:
@@ -139,24 +144,6 @@ common_fields = {
 
 # This is no longer used, but remains for future reference
 config_structure = {
-    'synctools': {
-        'verbosity': str,
-        'global_offset': float,
-        'delayed_exit': bool,
-        'extensions': str,
-        'backup': bool,
-        'backup_extension': str,
-    },
-    'clicktrack': {
-        'metronome': bool,
-        'first_beat': bool,
-        'taps': bool,
-        'mines': bool,
-        'amplitude': float,
-    },
-    'adjustoffset': {
-        'amount': str,
-    },
     'formatter': {
         'in_file': str,
         'out_file': str,

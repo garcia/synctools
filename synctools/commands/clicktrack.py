@@ -40,10 +40,10 @@ class Clicktrack(commands.SynctoolsCommand):
         },
         {
             'name': 'amplitude',
-            'title': 'Amplitude (0..1)',
+            'title': 'Amplitude',
             'input': commands.FieldInputs.text,
-            'default': '0.8',
-            'type': commands.FieldTypes.float_between(0, 1),
+            'default': 0.8,
+            'type': commands.FieldTypes.between(0, 1, float),
         },
         commands.common_fields['global_offset'],
     ]
