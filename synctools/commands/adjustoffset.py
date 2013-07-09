@@ -11,12 +11,12 @@ __all__ = ['AdjustOffset']
 
 class AdjustOffset(commands.SynctoolsCommand):
     
-    name = 'Adjust offset'
+    title = 'Adjust offset'
     fields = [
         {
             'name': 'amount',
             'title': 'Seconds to add',
-            'input': commands.InputTypes.text,
+            'input': commands.FieldInputs.text,
             'default': '0.000',
             'type': Decimal,
         },

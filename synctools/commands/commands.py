@@ -14,7 +14,7 @@ __all__ = ['SynctoolsCommand', 'InputTypes', 'find_simfiles', 'main', 'common_fi
 
 class SynctoolsCommand(object):
     
-    name = ''
+    title = ''
     fields = []
     backup_simfiles = False
     
@@ -33,8 +33,33 @@ class SynctoolsCommand(object):
         pass
 
 
-class InputTypes(object):
+class FieldInputs(object):
     text, boolean = xrange(2)
+
+
+class FieldTypes(object):
+    
+    @staticmethod
+    def yesno(value):
+        if isinstance(value, bool):
+            return value
+        elif isinstance(value, basestring):
+            first_letter = value[0].upper()
+            if first_letter == 'Y':
+                return True
+            elif first_letter == 'N':
+                return False
+            raise ValueError('expecting Y or N')
+        else:
+            raise TypeError('expecting a string or boolean')
+    
+    @staticmethod
+    def float_between(start, end):
+        def _float_between(value):
+            value = float(value)
+            assert start <= value <= end, "%s <= value <= %s" % (start, end)
+            return value
+        return _float_between
 
 
 def find_simfiles(path):
@@ -69,7 +94,7 @@ def main(Command):
     for field in Command.fields:
         while True:
             # Determine default value to show in brackets
-            if field['input'] == InputTypes.boolean:
+            if field['input'] == FieldInputs.boolean:
                 default_string = 'Y/n' if field['default'] else 'y/N'
             else:
                 default_string = field['default']
@@ -77,8 +102,7 @@ def main(Command):
             value = raw_input('{title} [{default}]: '.format(
                 title=field['title'], default=default_string))
             if not value:
-                options[field['name']] = field['default']
-                break
+                value = field['default']
             try:
                 options[field['name']] = field['type'](value)
                 break
@@ -99,14 +123,14 @@ common_fields = {
     'backup': {
         'name': 'backup',
         'title': 'Backup simfiles?',
-        'input': InputTypes.boolean,
+        'input': FieldInputs.boolean,
         'default': True,
         'type': yesno,
     },
-    'globaloffset': {
-        'name': 'globaloffset',
+    'global_offset': {
+        'name': 'global_offset',
         'title': 'Global offset',
-        'input': InputTypes.text,
+        'input': FieldInputs.text,
         'default': '0.000',
         'type': Decimal,
     },
