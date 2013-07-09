@@ -80,18 +80,7 @@ class SynctoolsGUI:
         self.glade.get_object('choose_simfiles').show_all()
     
     def menu_help_about(self, menuitem):
-        pass
-    
-    # Controls
-    
-    def controls_clear(self, button):
-        self.glade.get_object('simfiles').clear()
-    
-    def controls_options(self, button):
-        pass
-    
-    def controls_run(self, button):
-        pass
+        self.glade.get_object('about').show_all()
     
     # File chooser
     
@@ -102,19 +91,54 @@ class SynctoolsGUI:
             return
         # Open button was pressed
         self.add_simfiles(dialog.get_filenames())
-        
+    
+    # About dialog
+    
+    def about_response(self, dialog, response):
+        dialog.hide()
+    
+    # Run buttons
+    
+    def run_button(self, button, command):
+        print command
     
     # Initialization
     
     def __init__(self):
+        # Set up Glade
         self.glade = gtk.Builder()
         self.glade.add_from_file(SynctoolsGUI.gladefile)
         self.glade.connect_signals(self)
         
         # Populate command combo box
-        command_list = self.glade.get_object('commands')
+        notebook = self.glade.get_object('command_notebook')
+        self.optionfields = {}
+        # Create a page for each command
         for command in all_commands:
-            command_list.append([command.__name__, command.title])
+            # Save fields for future access
+            self.optionfields[command.__name__] = current_fields = {}
+            # Each tab is a Table with the first column used for labels
+            # and the second column for inputs.  There's one extra row that
+            # contains a "Run" button.
+            page = gtk.Table(rows=len(command.fields)+1, columns=2)
+            for f, field in enumerate(command.fields):
+                page.attach(gtk.Label(field['title']), 0, 1, f, f + 1)
+                if field['input'] == commands.FieldInputs.text:
+                    # Add text field
+                    field_widget = gtk.Entry()
+                    field_widget.set_text(str(field['default']))
+                elif field['input'] == commands.FieldInputs.boolean:
+                    # Add checkbox / check button
+                    field_widget = gtk.CheckButton()
+                    if field['default']:
+                        field_widget.set_active(True)
+                page.attach(field_widget, 1, 2, f, f + 1)
+                current_fields[field['name']] = field_widget
+            # Add "Run" button
+            run_button = gtk.Button(command.title)
+            run_button.connect('clicked', self.run_button, command.__name__)
+            page.attach(run_button, 0, 2, f + 1, f + 2, 0, 0, 0, 5)
+            notebook.append_page(page, gtk.Label(command.title))
         
         # Parse any file arguments
         self.add_simfiles(sys.argv[1:])
