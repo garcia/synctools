@@ -1,195 +1,186 @@
 #!/usr/bin/env python
+from decimal import Decimal
 from fractions import Fraction
 import logging
 import math
 import os
 import random
-import sys
 import wave
 
-from hsaudiotag import ogg, mpeg
+import commands
 
-import synctools
-from simfile import *
+__all__ = ['Clicktrack']
 
-__all__ = ['clicktrack']
+sample_rate = 44100
 
-unround_values = {
-    # thirds
-    333: 1. / 3,
-    667: 2. / 3,
-    # sixths
-    167: 1. / 6,
-    833: 5. / 6,
-    # twelfths
-     83: 1. / 12,
-    417: 5. / 12,
-    583: 7. / 12,
-    917: 11. / 12,
-    # sixteenths
-     63: 1. / 16,
-    188: 3. / 16,
-    313: 5. / 16,
-    438: 7. / 16,
-    563: 9. / 16,
-    688: 11. / 16,
-    813: 13. / 16,
-    938: 15. / 16
-}
-
-
-# This is a function because of the need to break out of multiple loops
-def get_hardest_chart(simfile):
-    log = logging.getLogger('synctools')
-    for diff in ('Challenge', 'Hard', 'Medium', 'Easy', 'Beginner', 'Edit'):
-        for game in ('dance', 'pump', 'ez2'):
-            for sd in ('single', 'double'):
-                try:
-                    chart = simfile.get_chart(difficulty=diff,
-                                         stepstype=(game + '-' + sd))
-                    log.info('Using %s-%s %s chart' % (game, sd, diff))
-                    return chart
-                except KeyError:
-                    pass
-
-
-def unround(number):
-    global unround_values
-    n = [int(part) for part in number.split('.')]
-    if n[1] in unround_values:
-        return n[0] + unround_values[n[1]]
-    else:
-        return float(number)
-
-
-def clicktrack(simfile):
-    log = logging.getLogger('synctools')
-    cfg = synctools.get_config()
-    # Retrieve the needed data
-    musicfile = simfile.get('MUSIC')[1]
-    bpms = dict(simfile.get('BPMS')[1])
-    stops = dict(simfile.get('STOPS')[1])
-    offset = float(simfile.get('OFFSET')[1]) + cfg['synctools']['global_offset']
-    # Retrieve the hardest chart, if possible
-    chart = get_hardest_chart(simfile)
-    if not chart:
-        log.warning('Unable to find any dance, pump, or ez2 charts')
-        # Get whatever the first chart is
-        try:
-            chart = simfile.get_chart(index=0)
-            log.info('Using %s %s chart' % (chart.stepstype,
-                                          chart.difficulty))
-        except NoChartError:
-            log.error('This simfile does not have any charts; aborting')
-            return
-    # Generate click track
-    clicks = []
-    for t, line in chart.notes.notes:
-        if any([c in '124' for c in line]) and cfg['clicktrack']['taps']:
-            clicks.append((t, 'tap'))
-        if any([c == 'M' for c in line]) and cfg['clicktrack']['mines']:
-            clicks.append((t, 'mine'))
-        if not t % 1 and cfg['clicktrack']['metronome']:
-            clicks.append((t, 'metronome'))
-    log.debug('%s clicks loaded' % len(clicks))
-    # Get the necessary metadata from the music file
-    musicpath = simfile.dirname + os.sep + musicfile
-    if not os.path.isfile(musicpath):
-        log.error(musicfile + ': audio file not found')
-        return
-    ext = os.path.splitext(musicpath)[1]
-    if not ext in ('.ogg', '.mp3', '.wav'):
-        log.error(musicfile + ': unknown audio format "%s"' % ext)
-        return
-    elif ext in ('.ogg', '.mp3'):
-        log.info('Loading audio file')
-        if ext == '.ogg':
-            metadata = ogg.Vorbis(musicpath)
-        elif ext == '.mp3':
-            metadata = mpeg.Mpeg(musicpath)
-        if not metadata.valid:
-            log.error(musicfile + ': unable to read file')
-            return
-        sample_rate = metadata.sample_rate
-        audio_length = (metadata.duration + 1) * sample_rate
-    elif ext == '.wav':
-        metadata = wave.open(musicpath)
-        sample_rate = metadata.getframerate()
-        audio_length = metadata.getnframes()
-        samples = audio_length
-    log.debug("%s fps, ~%s samples long" % (sample_rate, audio_length))
-    # Process BPM data
-    bpms[max(n[0] for n in chart.notes.notes)] = bpms[max(bpms.keys())]
-    beats = [(offset * -sample_rate, 'first_beat')] # first beat
-    # residue: samples between beat and end of bpm change
-    residue = 0
-    # cursor: the location of the beat or BPM change prior to current_click
-    cursor = 0
-    current_click, click_type = clicks.pop(0) # the next beat to locate
-    while len(bpms) > 1:
-        bpm_start = min(bpms.keys())
-        bpm_value = bpms.pop(bpm_start)
-        bpm_end = min(bpms.keys())
-        beat_length = 60 / bpm_value * sample_rate
-        while current_click <= bpm_end:
-            # add stop value(s) to residue
-            while len(stops) and min(stops.keys()) < current_click:
-                residue += Fraction(stops.pop(min(stops.keys())) * sample_rate)
-            beats.append((beats[-1][0] + Fraction(beat_length) * 
-                         (current_click - cursor) + 
-                         residue, click_type))
-            cursor = current_click
-            try:
-                current_click, click_type = clicks.pop(0)
-            except:
+class Clicktrack(commands.SynctoolsCommand):
+    
+    title = 'Generate click track'
+    fields = [
+        {
+            'name': 'metronome',
+            'title': 'Metronome (noise on each beat)',
+            'input': commands.FieldInputs.boolean,
+            'default': True,
+            'type': commands.FieldTypes.yesno,
+        },
+        {
+            'name': 'taps',
+            'title': 'Taps (sine bloop on each tap note)',
+            'input': commands.FieldInputs.boolean,
+            'default': True,
+            'type': commands.FieldTypes.yesno,
+        },
+        {
+            'name': 'mines',
+            'title': 'Mines (square bloop on each mine)',
+            'input': commands.FieldInputs.boolean,
+            'default': True,
+            'type': commands.FieldTypes.yesno,
+        },
+        {
+            'name': 'amplitude',
+            'title': 'Amplitude (0..1)',
+            'input': commands.FieldInputs.text,
+            'default': '0.8',
+            'type': commands.FieldTypes.float_between(0, 1),
+        },
+        commands.common_fields['global_offset'],
+    ]
+    
+    def __init__(self, options):
+        super(Clicktrack, self).__init__(options)
+        # Generate sounds for the clicktrack
+        amp = self.options['amplitude']
+        self.sound = {
+            'metronome': ''.join([
+                chr(int(random.randrange(256) * a + 127 * (1 - a)))
+                for a in [amp * b / 1024. for b in xrange(1024, 0, -1)]
+            ]),
+            'tap': ''.join([
+                chr(int((math.sin(b / 4.) * 127 + 127) * a + 127 * (1 - a)))
+                for a, b in [(amp * b / 1024., b) for b in xrange(1024, 0, -1)]
+            ]),
+            'mine': ''.join([
+                chr(int((int(b / 128) % 2) * 255 * a + 127 * (1 - a)))
+                for a, b in [(amp * b / 1024., b) for b in xrange(1024, 0, -1)]
+            ]),
+        }
+    
+    def get_hardest_chart(self):
+        for diff in ('Challenge', 'Hard', 'Medium', 'Easy', 'Beginner', 'Edit'):
+            for game in ('dance', 'pump', 'ez2'):
+                for sd in ('single', 'double'):
+                    try:
+                        chart = self.simfile.charts.get(
+                            difficulty=diff, stepstype=(game + '-' + sd)
+                        )
+                        return chart
+                    except KeyError:
+                        pass
+    
+    def current_bpm(self, beat):
+        # Get all the BPMs that are before the current beat,
+        # then return the last one
+        return [value for t, value in self.simfile['BPMS'] if t <= beat][-1]
+    
+    def seconds_between_beats(self, start, end):
+        bpm = self.current_bpm(start)
+        pos = start
+        seconds = 0.
+        # Iterate over the timing events
+        for event, t, value in self.timing_events:
+            if start <= t < end:
+                # Add the time elapsed between the previous and current beats,
+                # which are guaranteed to have no timing events between them
+                seconds += float(60 / bpm) * (t - pos)
+                # Handle timing event
+                if event == 'stop':
+                    seconds += float(value)
+                elif event == 'bpm':
+                    bpm = value
+                # Update position
+                pos = t
+            elif t >= end:
+                # At this point there's no need to loop any further
                 break
-            residue = 0
-        # residue will remain 0 if bpm_end is on a whole beat
-        residue += (bpm_end - cursor) * Fraction(beat_length)
-        cursor = bpm_end
-    # Generate some sounds
-    amp = cfg['clicktrack']['amplitude']
-    sound = {
-        'metronome': ''.join([
-            chr(int(random.randrange(256) * a + 127 * (1 - a)))
-            for a in [amp * b / 1024. for b in xrange(1024, 0, -1)]
-        ]),
-        'tap': ''.join([
-            chr(int((math.sin(b / 4.) * 127 + 127) * a + 127 * (1 - a)))
-            for a, b in [(amp * b / 1024., b) for b in xrange(1024, 0, -1)]
-        ]),
-        'mine': ''.join([
-            chr(int((int(b / 128) % 2) * 255 * a + 127 * (1 - a)))
-            for a, b in [(amp * b / 1024., b) for b in xrange(1024, 0, -1)]
-        ]),
-    }
-    # Write click track to memory buffer
-    log.info('Generating click track')
-    clicks = bytearray('\x80' * audio_length)
-    for i, (click, click_type) in enumerate(beats):
-        click = int(click)
-        # Too early
-        if click < 0:
-            continue
-        # Too late
-        if click + 1024 > audio_length:
-            break
-        if click_type == 'first_beat':
-            if not cfg['clicktrack']['first_beat']:
-                continue
-            click_type = 'metronome'
-        clicks[int(click):int(click) + 1024] = sound[click_type]
-    # Write to WAV
-    log.info('Writing WAV file')
-    clicks_h = wave.open(simfile.dirname + os.sep + 'clicktrack.wav', 'w')
-    clicks_h.setnchannels(1)
-    clicks_h.setsampwidth(1)
-    clicks_h.setframerate(sample_rate)
-    clicks_h.writeframes(str(clicks))
-    clicks_h.close()
-    log.info('Done.')
+        # The last observed position will be less than the ending beat;
+        # add the remaining time now
+        seconds += float(60 / bpm) * (end - pos)
+        return seconds
+    
+    def run(self, simfile):
+        super(Clicktrack, self).run(simfile)
+        self.simfile = simfile
+        
+        # Convert BPMS and STOPS to "timing events" - a combination of the two
+        # event types in one list
+        self.timing_events = [('bpm', t, v) for t, v in simfile['BPMS']]
+        self.timing_events += [('stop', t, v) for t, v in simfile['STOPS']]
+        self.timing_events.sort(key=lambda item: item[1])
+        
+        # Combine simfile's offset with the given global offset
+        offset = Decimal(simfile['OFFSET']) + self.options['global_offset']
+        
+        # Retrieve the hardest chart, if possible
+        chart = self.get_hardest_chart()
+        if not chart:
+            self.log.warning('Unable to find any dance, pump, or ez2 charts')
+            # Get whatever the first chart is
+            try:
+                chart = simfile.charts[0]
+            except IndexError:
+                self.log.error('This simfile has no charts; aborting')
+                return
+        self.log.info('Using {stepstype} {difficulty} chart'.format(
+            stepstype=chart.stepstype,
+            difficulty=chart.difficulty,
+        ))
+        
+        # Determine where to place clicks
+        clicks = []
+        if self.options['metronome']:
+            for i in xrange(int(chart.notes[-1][0])):
+                clicks.append((i, 'metronome'))
+        for t, line in chart.notes:
+            if any([c in '124' for c in line]) and self.options['taps']:
+                clicks.append((t, 'tap'))
+            if any([c == 'M' for c in line]) and self.options['mines']:
+                clicks.append((t, 'mine'))
+        clicks.sort(key=lambda item: item[0])
+        self.log.debug('%s clicks loaded' % len(clicks))
+        
+        # Length of audio file = distance from beat 0 to last beat + padding
+        audio_length = self.seconds_between_beats(0, clicks[-1][0]) + 1
+        
+        # Write click track to memory buffer
+        self.log.info('Generating click track')
+        buffer = bytearray('\x80' * int(sample_rate * audio_length))
+        last_beat = second = 0
+        for beat, sound in clicks:
+            second += self.seconds_between_beats(last_beat, beat)
+            sample = int(second * sample_rate)
+            buffer[sample:sample+1024] = self.sound[sound]
+            last_beat = beat
+        
+        # Compensate for offset
+        offset_samples = int(offset * sample_rate)
+        if offset_samples > 0:
+            del buffer[:offset_samples]
+        elif offset_samples < 0:
+            buffer[0:0] = '\x80' * abs(offset_samples)
+        
+        # Write to WAV
+        self.log.info('Writing WAV file')
+        wav = os.path.join(os.path.dirname(simfile.filename), 'clicktrack.wav')
+        clicks_h = wave.open(wav, 'w')
+        clicks_h.setnchannels(1)
+        clicks_h.setsampwidth(1)
+        clicks_h.setframerate(sample_rate)
+        clicks_h.writeframes(str(buffer))
+        clicks_h.close()
+        self.log.info('Done.')
 
 
 if __name__ == '__main__':
-    os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
-    synctools.main_iterator(clicktrack, sys.argv[1:], rerunnable=True)
+    commands.main(Clicktrack)
