@@ -9,7 +9,7 @@
     <property name="type_hint">dialog</property>
     <property name="program_name">synctools</property>
     <property name="copyright" translatable="yes">© Grant Garcia 2013</property>
-    <property name="comments" translatable="yes">v0.8</property>
+    <property name="comments" translatable="yes">v0.8.0</property>
     <property name="website">https://github.com/grantgarcia/synctools</property>
     <property name="website_label" translatable="yes">synctools on GitHub</property>
     <property name="license" translatable="yes">The MIT License (MIT)
@@ -135,6 +135,95 @@ THE SOFTWARE.</property>
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkWindow" id="output">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Script output</property>
+    <child>
+      <object class="GtkVBox" id="output_vbox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolledwindow1">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hscrollbar_policy">never</property>
+            <property name="vscrollbar_policy">automatic</property>
+            <child>
+              <object class="GtkTextView" id="output_textview">
+                <property name="width_request">480</property>
+                <property name="height_request">320</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="editable">False</property>
+                <property name="wrap_mode">word</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="output_buttons">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkButton" id="output_clear">
+                <property name="label" translatable="yes">Clear output</property>
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="output_clear" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="output_close">
+                <property name="label" translatable="yes">Close window</property>
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="output_close" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMenu" id="simfile_tree_right_click">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="simfile_tree_right_click_delete">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="simfile_tree_right_click_delete" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="simfiles">
     <columns>
       <!-- column-name Title -->
@@ -246,6 +335,8 @@ THE SOFTWARE.</property>
                 <property name="can_focus">True</property>
                 <property name="model">simfiles</property>
                 <property name="enable_grid_lines">both</property>
+                <signal name="button-press-event" handler="simfile_tree_button_press" swapped="no"/>
+                <signal name="key-press-event" handler="simfile_tree_key_press" swapped="no"/>
                 <child>
                   <object class="GtkTreeViewColumn" id="title">
                     <property name="resizable">True</property>
