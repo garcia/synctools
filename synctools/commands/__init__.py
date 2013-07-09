@@ -1,3 +1,3 @@
 from commands import *
 
-__all__ = ['adjustoffset', 'clicktrack', 'gimmicks', 'magicstops', 'patch']
+__all__ = ['adjustoffset', 'clicktrack', 'fixstops', 'gimmickbuilder', 'patch']
