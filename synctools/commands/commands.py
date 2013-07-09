@@ -21,7 +21,19 @@ class SynctoolsCommand(object):
     
     def __init__(self, options):
         self.log = logging.getLogger('synctools')
-        self.options = options
+        # Verify option types
+        self.options = {}
+        for key, value in options.items():
+            field = [field for field in self.fields if key == field['name']]
+            if not field:
+                raise ValueError('Invalid field %r.' % key)
+            field = field[0]
+            try:
+                parsed_value = field['type'](value)
+            except Exception:
+                raise TypeError('Invalid value %r for field %r.' %
+                                (value, key))
+            self.options[key] = parsed_value
     
     def backup(self, simfile):
         shutil.copy2(simfile.filename, simfile.filename + '~')
