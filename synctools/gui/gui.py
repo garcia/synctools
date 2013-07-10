@@ -171,14 +171,11 @@ class SynctoolsGUI:
         
         # Process the simfiles
         simfile_list = self.glade.get_object('simfiles')
-        self.log.info('Running command %r on %d simfiles.' %
-                      (Command.title, len(simfile_list)))
         try:
             command_instance = Command(options)
         except Exception:
             self.log.error(traceback.format_exc().splitlines()[-1])
         for item in simfile_list:
-            self.log.info('Processing {title}...'.format(title=item[0]))
             while gtk.events_pending():
                 gtk.main_iteration_do(False)
             try:
@@ -186,7 +183,6 @@ class SynctoolsGUI:
             except Exception:
                 self.log.error(traceback.format_exc().splitlines()[-1])
         command_instance.done()
-        self.log.info('Done.')
         self.log.info('')
     
     # Output window

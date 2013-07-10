@@ -178,4 +178,3 @@ class ClickTrack(command.SynctoolsCommand):
         clicks_h.setframerate(self.sample_rate)
         clicks_h.writeframes(str(buffer))
         clicks_h.close()
-        self.log.info('Done.')

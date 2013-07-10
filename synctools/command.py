@@ -21,6 +21,7 @@ class SynctoolsCommand(object):
     
     def __init__(self, options):
         self.log = logging.getLogger('synctools')
+        self.log.info('Initializing %s...' % self.__class__.__name__)
         # Verify option types
         self.options = {}
         for key, value in options.items():
@@ -39,11 +40,12 @@ class SynctoolsCommand(object):
         shutil.copy2(simfile.filename, simfile.filename + '~')
     
     def run(self, simfile):
-        if 'backup' in self.options and self.options['backup']:
+        self.log.info('Processing %s...' % simfile.get('TITLE', '<untitled>'))
+        if self.options.get('backup'):
             self.backup(simfile)
     
     def done(self):
-        pass
+        self.log.info('Done.')
 
 
 class FieldInputs(object):
