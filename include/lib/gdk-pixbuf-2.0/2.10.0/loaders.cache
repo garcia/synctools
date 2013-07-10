@@ -1,0 +1,14 @@
+# GdkPixbuf Image Loader Modules file
+# Automatically generated file, do not edit
+# Created by gdk-pixbuf-query-loaders.exe from gdk-pixbuf-2.24.0
+#
+# LoaderDir = C:\Python27\Lib\site-packages\gtk-2.0\runtime/lib/gdk-pixbuf-2.0/2.10.0/loaders
+#
+"C:/Python27/Lib/site-packages/gtk-2.0/runtime/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.dll"
+"svg" 2 "gdk-pixbuf" "Scalable Vector Graphics" "LGPL"
+"image/svg+xml" "image/svg" "image/svg-xml" "image/vnd.adobe.svg+xml" "text/xml-svg" ""
+"svg" ""
+" <svg" "*    " 100
+" <!DOCTYPE svg" "*             " 100
+
+

@@ -5,7 +5,6 @@
 *.egg-info
 dist
 build
-include
 eggs
 parts
 bin
