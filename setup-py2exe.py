@@ -24,6 +24,7 @@ setup(
     name='synctools',
     description='synctools v'+__version__,
     version=__version__,
+    console=['synctools-cli.py'],
     windows=[{'script': 'synctools-gui.py'}],
     options={
         'py2exe': {
