@@ -75,7 +75,7 @@ class ClickTrack(command.SynctoolsCommand):
                             difficulty=diff, stepstype=(game + '-' + sd)
                         )
                         return chart
-                    except KeyError:
+                    except LookupError:
                         pass
     
     def current_bpm(self, beat):
