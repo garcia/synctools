@@ -1,16 +1,17 @@
 synctools
 =========
 
-A set of tools to assist syncing simfiles for StepMania / In The Groove.
+A set of tools to assist syncing simfiles for StepMania.
 
----------
+Requirements
+------------
 
-Requirements:
+* Python 2.6+
+* [PyYAML](http://pyyaml.org/)
+* [PyGTK](http://www.pygtk.org/) and its dependencies
+* [simfile](https://github.com/grantgarcia/simfile) 0.10
 
-* 2.6 <= Python < 3.0
-* [simfile](https://github.com/grantgarcia/simfile)
-* hsaudiotag: http://pypi.python.org/pypi/hsaudiotag or `pip install hsaudiotag`
+Windows builds
+--------------
 
----------
-
-Windows builds are available [here](http://grantgarcia.org/github/synctools/).
+Windows builds are available [here](http://grantgarcia.org/synctools/) and should have no dependencies other than the [Microsoft Visual C++ 2008 Redistributable Package](http://www.microsoft.com/en-us/download/details.aspx?id=29).
