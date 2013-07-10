@@ -12,6 +12,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gtk.glade
+
 from simfile import Simfile
 from simfile.msd import MSDParser
 
@@ -211,12 +212,12 @@ class SynctoolsGUI:
         for cn, Command in utils.get_commands().items():
             # Save fields for future access
             self.optionfields[cn] = current_fields = {}
-            # Each tab is a Table with the first column used for labels
-            # and the second column for inputs.  There's one extra row that
-            # contains a "Run" button.
-            page = gtk.Table(rows=len(Command.fields)+1, columns=2)
+            # Each tab is a Table with the first column used for labels and the
+            # second column for inputs.  There's an extra row at the top for
+            # the description and one at the bottom for the "Run" button.
+            page = gtk.Table(rows=len(Command.fields)+2, columns=2)
             for f, field in enumerate(Command.fields):
-                page.attach(gtk.Label(field['title']), 0, 1, f, f + 1)
+                page.attach(gtk.Label(field['title']), 0, 1, f + 1, f + 2)
                 if field['input'] == command.FieldInputs.text:
                     # Add text field
                     field_widget = gtk.Entry()
@@ -226,12 +227,14 @@ class SynctoolsGUI:
                     field_widget = gtk.CheckButton()
                     if field['default']:
                         field_widget.set_active(True)
-                page.attach(field_widget, 1, 2, f, f + 1)
+                page.attach(field_widget, 1, 2, f + 1, f + 2)
                 current_fields[field['name']] = field_widget
+            # Add description
+            page.attach(gtk.Label(Command.description), 0, 2, 0, 1)
             # Add "Run" button
             run_button = gtk.Button(Command.title)
             run_button.connect('clicked', self.run_button, cn)
-            page.attach(run_button, 0, 2, f + 1, f + 2, 0, 0, 0, 5)
+            page.attach(run_button, 0, 2, f + 2, f + 3, 0, 0, 0, 5)
             notebook.append_page(page, gtk.Label(Command.title))
         
         # Allow selection of multiple simfiles
