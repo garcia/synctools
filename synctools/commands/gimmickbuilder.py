@@ -17,7 +17,7 @@ class GimmickBuilder(command.SynctoolsCommand):
     
     title = 'Gimmick builder'
     description='convert a gimmicks.txt file into BPM changes and stops'
-    fields = []
+    fields = [command.common_fields['backup']]
     
     builtin_gimmicks = yaml.load("""
 stutter:

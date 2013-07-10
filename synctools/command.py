@@ -80,7 +80,7 @@ class FieldTypes(object):
 common_fields = {
     'backup': {
         'name': 'backup',
-        'title': 'Backup simfiles?',
+        'title': 'Back up simfiles?',
         'input': FieldInputs.boolean,
         'default': True,
         'type': FieldTypes.yesno,

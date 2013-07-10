@@ -26,7 +26,7 @@ class Patch(command.SynctoolsCommand):
         },
         {
             'name': 'backup_audio',
-            'title': 'Backup audio file?',
+            'title': 'Back up audio files?',
             'input': command.FieldInputs.boolean,
             'default': True,
             'type': command.FieldTypes.yesno,

@@ -9,7 +9,7 @@ class FixStops(command.SynctoolsCommand):
     
     title = 'Fix stops'
     description = 'mitigate the effects of imprecise rounding in stop values'
-    fields = []
+    fields = [command.common_fields['backup']]
     margin = 0.001
     
     def run(self, simfile):
