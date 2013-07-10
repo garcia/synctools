@@ -7,8 +7,10 @@ Members
 -------
 
 .. automodule:: synctools.command
+    :members: SynctoolsCommand, FieldInputs, FieldTypes
 
 .. automodule:: synctools.utils
+    :members: get_commands, find_simfiles
 
 Commands
 --------
