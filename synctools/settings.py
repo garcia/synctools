@@ -1,0 +1,1 @@
+COMMANDS = ['adjustoffset', 'clicktrack', 'fixstops', 'gimmickbuilder', 'patch']

@@ -2,4 +2,4 @@
 from synctools.gui import SynctoolsGUI
 
 if __name__ == "__main__":
-   SynctoolsGUI().main()
+   SynctoolsGUI()

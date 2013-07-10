@@ -15,9 +15,7 @@ import gtk.glade
 from simfile import Simfile
 from simfile.msd import MSDParser
 
-from synctools import commands
-from synctools.commands.all_commands import all_commands
-
+from synctools import command, settings, utils
 
 class GtkTextViewHandler(logging.Handler):
     
@@ -62,7 +60,7 @@ class SynctoolsGUI:
     def add_simfiles(self, paths):
         simfile_paths = []
         for path in paths:
-            simfile_paths.extend(commands.find_simfiles(path))
+            simfile_paths.extend(utils.find_simfiles(path))
         simfile_list = self.glade.get_object('simfiles')
         for path in simfile_paths:
             # Don't re-add simfiles that were already added
@@ -153,17 +151,17 @@ class SynctoolsGUI:
     
     def run_button(self, button, command_name):
         # Get command class
-        for command in all_commands:
-            if command_name == command.__name__:
+        for cn, Command in utils.get_commands().items():
+            if command_name == cn:
                 break
         
         # Get option fields
         options = {}
         for field, widget in self.optionfields[command_name].items():
-            field_dict = [f for f in command.fields if f['name'] == field][0]
-            if field_dict['input'] == commands.FieldInputs.boolean:
+            field_dict = [f for f in Command.fields if f['name'] == field][0]
+            if field_dict['input'] == command.FieldInputs.boolean:
                 options[field] = widget.get_active()
-            elif field_dict['input'] == commands.FieldInputs.text:
+            elif field_dict['input'] == command.FieldInputs.text:
                 options[field] = widget.get_text()
         
         # Create output window
@@ -173,9 +171,9 @@ class SynctoolsGUI:
         # Process the simfiles
         simfile_list = self.glade.get_object('simfiles')
         self.log.info('Running command %r on %d simfiles.' %
-                      (command.title, len(simfile_list)))
+                      (Command.title, len(simfile_list)))
         try:
-            command_instance = command(options)
+            command_instance = Command(options)
         except Exception:
             self.log.error(traceback.format_exc().splitlines()[-1])
         for item in simfile_list:
@@ -210,20 +208,20 @@ class SynctoolsGUI:
         notebook = self.glade.get_object('command_notebook')
         self.optionfields = {}
         # Create a page for each command
-        for command in all_commands:
+        for cn, Command in utils.get_commands().items():
             # Save fields for future access
-            self.optionfields[command.__name__] = current_fields = {}
+            self.optionfields[cn] = current_fields = {}
             # Each tab is a Table with the first column used for labels
             # and the second column for inputs.  There's one extra row that
             # contains a "Run" button.
-            page = gtk.Table(rows=len(command.fields)+1, columns=2)
-            for f, field in enumerate(command.fields):
+            page = gtk.Table(rows=len(Command.fields)+1, columns=2)
+            for f, field in enumerate(Command.fields):
                 page.attach(gtk.Label(field['title']), 0, 1, f, f + 1)
-                if field['input'] == commands.FieldInputs.text:
+                if field['input'] == command.FieldInputs.text:
                     # Add text field
                     field_widget = gtk.Entry()
                     field_widget.set_text(str(field['default']))
-                elif field['input'] == commands.FieldInputs.boolean:
+                elif field['input'] == command.FieldInputs.boolean:
                     # Add checkbox / check button
                     field_widget = gtk.CheckButton()
                     if field['default']:
@@ -231,10 +229,10 @@ class SynctoolsGUI:
                 page.attach(field_widget, 1, 2, f, f + 1)
                 current_fields[field['name']] = field_widget
             # Add "Run" button
-            run_button = gtk.Button(command.title)
-            run_button.connect('clicked', self.run_button, command.__name__)
+            run_button = gtk.Button(Command.title)
+            run_button.connect('clicked', self.run_button, cn)
             page.attach(run_button, 0, 2, f + 1, f + 2, 0, 0, 0, 5)
-            notebook.append_page(page, gtk.Label(command.title))
+            notebook.append_page(page, gtk.Label(Command.title))
         
         # Allow selection of multiple simfiles
         selection = self.glade.get_object('simfile_tree').get_selection()
@@ -260,6 +258,4 @@ class SynctoolsGUI:
             gtk.gdk.ACTION_COPY
         )
         self.window.show_all()
-    
-    def main(self):
         gtk.main()

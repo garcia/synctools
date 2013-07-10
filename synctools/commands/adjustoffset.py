@@ -1,22 +1,23 @@
 #!/usr/bin/env python
 from decimal import *
 
-import commands
+from synctools import command
 
 __all__ = ['AdjustOffset']
 
-class AdjustOffset(commands.SynctoolsCommand):
+class AdjustOffset(command.SynctoolsCommand):
     
     title = 'Adjust offset'
+    description = 'tweak offsets for hardware delay and/or personal preference'
     fields = [
         {
             'name': 'amount',
             'title': 'Seconds to add',
-            'input': commands.FieldInputs.text,
+            'input': command.FieldInputs.text,
             'default': '0.000',
             'type': Decimal,
         },
-        commands.common_fields['backup'],
+        command.common_fields['backup'],
     ]
     
     def run(self, simfile):
@@ -26,7 +27,3 @@ class AdjustOffset(commands.SynctoolsCommand):
         self.log.info('%s -> %s' % (old_offset, new_offset))
         simfile['OFFSET'] = new_offset
         simfile.save()
-
-
-if __name__ == '__main__':
-    commands.main(AdjustOffset)

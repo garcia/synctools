@@ -9,13 +9,14 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
-import commands
+from synctools import command
 
 __all__ = ['GimmickBuilder']
 
-class GimmickBuilder(commands.SynctoolsCommand):
+class GimmickBuilder(command.SynctoolsCommand):
     
     title = 'Gimmick builder'
+    description='convert a gimmicks.txt file into BPM changes and stops'
     fields = []
     
     builtin_gimmicks = yaml.load("""
@@ -181,7 +182,3 @@ quarterboost:
             simfile[timing.upper()] = Timing(','.join(tlist))
         
         simfile.save()
-
-
-if __name__ == '__main__':
-    commands.main(GimmickBuilder)

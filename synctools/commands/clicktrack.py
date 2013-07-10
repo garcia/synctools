@@ -5,49 +5,50 @@ import os
 import random
 import wave
 
-import commands
+from synctools import command
 
-__all__ = ['Clicktrack']
+__all__ = ['ClickTrack']
 
-class Clicktrack(commands.SynctoolsCommand):
+class ClickTrack(command.SynctoolsCommand):
     
-    title = 'Generate click track'
+    title = 'Click track'
+    description = 'generate a click track WAV file'
     fields = [
         {
             'name': 'metronome',
             'title': 'Metronome (noise on each beat)',
-            'input': commands.FieldInputs.boolean,
+            'input': command.FieldInputs.boolean,
             'default': True,
-            'type': commands.FieldTypes.yesno,
+            'type': command.FieldTypes.yesno,
         },
         {
             'name': 'taps',
             'title': 'Taps (sine bloop on each tap note)',
-            'input': commands.FieldInputs.boolean,
+            'input': command.FieldInputs.boolean,
             'default': True,
-            'type': commands.FieldTypes.yesno,
+            'type': command.FieldTypes.yesno,
         },
         {
             'name': 'mines',
             'title': 'Mines (square bloop on each mine)',
-            'input': commands.FieldInputs.boolean,
+            'input': command.FieldInputs.boolean,
             'default': True,
-            'type': commands.FieldTypes.yesno,
+            'type': command.FieldTypes.yesno,
         },
         {
             'name': 'amplitude',
             'title': 'Amplitude',
-            'input': commands.FieldInputs.text,
+            'input': command.FieldInputs.text,
             'default': 0.8,
-            'type': commands.FieldTypes.between(0, 1, float),
+            'type': command.FieldTypes.between(0, 1, float),
         },
-        commands.common_fields['global_offset'],
+        command.common_fields['global_offset'],
     ]
     
     sample_rate = 44100
     
     def __init__(self, options):
-        super(Clicktrack, self).__init__(options)
+        super(ClickTrack, self).__init__(options)
         # Generate sounds for the clicktrack
         amp = self.options['amplitude']
         self.sound = {
@@ -108,7 +109,7 @@ class Clicktrack(commands.SynctoolsCommand):
         return seconds
     
     def run(self, simfile):
-        super(Clicktrack, self).run(simfile)
+        super(ClickTrack, self).run(simfile)
         self.simfile = simfile
         
         # Convert BPMS and STOPS to "timing events" - a combination of the two
@@ -178,7 +179,3 @@ class Clicktrack(commands.SynctoolsCommand):
         clicks_h.writeframes(str(buffer))
         clicks_h.close()
         self.log.info('Done.')
-
-
-if __name__ == '__main__':
-    commands.main(Clicktrack)

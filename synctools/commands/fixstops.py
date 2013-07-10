@@ -1,10 +1,14 @@
 #!/usr/bin/env python
-import commands
 from simfile import Timing
 
-class FixStops(commands.SynctoolsCommand):
+from synctools import command
+
+__all__ = ['FixStops']
+
+class FixStops(command.SynctoolsCommand):
     
     title = 'Fix stops'
+    description = 'mitigate the effects of imprecise rounding in stop values'
     fields = []
     margin = 0.001
     
@@ -61,6 +65,3 @@ class FixStops(commands.SynctoolsCommand):
         ))
         simfile.save()
         self.log.info('Corrected about %s milliseconds of drift' % abs(drift))
-
-if __name__ == '__main__':
-    commands.main(FixStops)

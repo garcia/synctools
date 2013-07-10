@@ -4,7 +4,7 @@ import shutil
 import struct
 import zlib
 
-import commands
+from synctools import command
 
 __all__ = ['Patch']
 
@@ -12,23 +12,24 @@ __all__ = ['Patch']
 bitswap = ''.join([chr(sum([((val >> i) & 1) << (7-i) for i in range(8)]))
     for val in range(256)])
 
-class Patch(commands.SynctoolsCommand):
+class Patch(command.SynctoolsCommand):
     
     title = 'Length-patch OGG'
+    description = 'trick In The Groove r21 into accepting long songs'
     fields = [
         {
             'name': 'length',
             'title': 'Patched length in seconds',
-            'input': commands.FieldInputs.text,
+            'input': command.FieldInputs.text,
             'default': 105,
-            'type': commands.FieldTypes.between(0, 600),
+            'type': command.FieldTypes.between(0, 600),
         },
         {
             'name': 'backup_audio',
             'title': 'Backup audio file?',
-            'input': commands.FieldInputs.boolean,
+            'input': command.FieldInputs.boolean,
             'default': True,
-            'type': commands.FieldTypes.yesno,
+            'type': command.FieldTypes.yesno,
         },
     ]
     
@@ -78,7 +79,3 @@ class Patch(commands.SynctoolsCommand):
             audiofile.write(lp)
         self.log.info('Patched audio length from %s seconds to %s seconds' %
             (oldlength, patchlength))
-
-
-if __name__ == '__main__':
-    commands.main(Patch)
