@@ -9,7 +9,6 @@
     <property name="type_hint">dialog</property>
     <property name="program_name">synctools</property>
     <property name="copyright" translatable="yes">© Grant Garcia 2013</property>
-    <property name="comments" translatable="yes">v0.8.0</property>
     <property name="website">https://github.com/grantgarcia/synctools</property>
     <property name="website_label" translatable="yes">synctools on GitHub</property>
     <property name="license" translatable="yes">The MIT License (MIT)

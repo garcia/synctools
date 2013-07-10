@@ -16,7 +16,7 @@ import gtk.glade
 from simfile import Simfile
 from simfile.msd import MSDParser
 
-from synctools import command, settings, utils
+from synctools import __version__, command, settings, utils
 
 class GtkTextViewHandler(logging.Handler):
     
@@ -201,6 +201,13 @@ class SynctoolsGUI:
         self.glade.add_from_file(SynctoolsGUI.gladefile)
         self.glade.connect_signals(self)
         
+        # Set up logging
+        self.log = logging.getLogger('synctools')
+        self.log.setLevel(logging.INFO)
+        self.log.addHandler(GtkTextViewHandler(
+            self.glade.get_object('output_textview')
+        ))
+        
         # Populate command combo box
         notebook = self.glade.get_object('command_notebook')
         self.optionfields = {}
@@ -240,12 +247,8 @@ class SynctoolsGUI:
         # Parse any file arguments
         self.add_simfiles(sys.argv[1:])
         
-        # Set up logging
-        self.log = logging.getLogger('synctools')
-        self.log.setLevel(logging.INFO)
-        self.log.addHandler(GtkTextViewHandler(
-            self.glade.get_object('output_textview')
-        ))
+        # Add version number to about window
+        self.glade.get_object('about').set_comments('v' + __version__)
         
         # Set up main window
         self.window = self.glade.get_object('synctools')
