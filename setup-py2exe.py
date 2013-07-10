@@ -6,6 +6,9 @@ import sys
 
 import py2exe
 
+from synctools import __version__
+from synctools.settings import COMMANDS
+
 # Find GTK+ installation path
 __import__('gtk')
 m = sys.modules['gtk']
@@ -15,14 +18,12 @@ gtk_base_path = m.__path__[0]
 get_python_lib()
 
 # Find installed commands
-from synctools.commands.all_commands import module_names
-modules = ['synctools/commands/%s.py' % name for name in module_names]
+modules = ['synctools/commands/%s.py' % name for name in COMMANDS]
 
 setup(
     name='synctools',
-    description='Tools to assist synchronizing StepMania simfiles',
-    version=__import__('synctools').__version__,
-    packages=['synctools'],
+    description='synctools v'+__version__,
+    version=__version__,
     windows=[{'script': 'synctools-gui.py'}],
     options={
         'py2exe': {
@@ -39,5 +40,13 @@ setup(
     ],
 )
 
+dist_synctools = os.path.join('dist', 'synctools')
+if os.path.exists(dist_synctools):
+    shutil.rmtree(dist_synctools)
+shutil.copytree('synctools', dist_synctools)
+
 for subdir in ('etc', 'lib', 'share'):
-    shutil.copytree(os.path.join('include', subdir), os.path.join('dist', subdir))
+    dist_path = os.path.join('dist', subdir)
+    if not os.path.exists(dist_path):
+        print 'copying', subdir
+        shutil.copytree(os.path.join('include', subdir), dist_path)
