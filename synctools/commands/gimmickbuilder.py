@@ -143,7 +143,7 @@ quarterboost:
                     t['bpms'][stop] = g['bpm']
 
     def run(self, simfile):
-        super(GimmicksBuilder, self).run(simfile)
+        super(GimmickBuilder, self).run(simfile)
         
         gpath = os.path.join(os.path.dirname(simfile.filename), 'gimmicks.txt')
         
