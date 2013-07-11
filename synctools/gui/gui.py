@@ -31,7 +31,7 @@ class GtkTextViewHandler(logging.Handler):
             msg = self.format(record)
             fs  = "%s\n"
             self.tbf.insert(self.tbf.get_end_iter(), fs % msg)
-            self.tv.scroll_to_iter(self.tbf.get_end_iter(), 0.0, False, 0, 0)
+            self.tv.scroll_mark_onscreen(self.tbf.get_insert())
         except:
             self.handleError(record)
 
