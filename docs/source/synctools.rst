@@ -12,22 +12,7 @@ Members
 .. automodule:: synctools.utils
     :members: get_commands, find_simfiles
 
-Commands
---------
+Example usage
+-------------
 
-.. automodule:: synctools.commands.adjustoffset
-
-.. automodule:: synctools.commands.clicktrack
-
-.. automodule:: synctools.commands.fixstops
-
-.. automodule:: synctools.commands.gimmickbuilder
-
-.. automodule:: synctools.commands.patch
-
-Interfaces
-----------
-
-.. automodule:: synctools.gui
-
-.. automodule:: synctools.cli
+TODO

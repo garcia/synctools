@@ -12,6 +12,8 @@ Contents:
    :maxdepth: 2
 
    synctools
+   commands
+   interfaces
 
 
 Indices and tables
