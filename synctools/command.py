@@ -17,11 +17,11 @@ class SynctoolsCommand(object):
 
     The following attributes must be defined:
 
-        * 'title' -- a human-friendly title for the command
-        * 'description' -- a brief overview of what the command does
-        * 'fields' -- a list of option fields to be presented to the user
+        * `title` -- a human-friendly title for the command
+        * `description` -- a brief overview of what the command does
+        * `fields` -- a list of option fields to be presented to the user
 
-    Each field is a dict containing the following items:
+    Each option field is a dict containing the following items:
 
         * "name" -- the name the field will be given in self.options
         * "title" -- a human-friendly title for the field
@@ -60,7 +60,7 @@ class SynctoolsCommand(object):
     
     def backup(self, simfile):
         """
-        Backup the current simfile. If 'backup' is set to True in the command's
+        Backup the current simfile. If `backup` is set to True in the command's
         options, this is automatically called before each run().
         """
         shutil.copy2(simfile.filename, simfile.filename + '~')
