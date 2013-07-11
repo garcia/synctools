@@ -46,6 +46,10 @@ class SynctoolsGUI:
         gtk.main_quit()
         return False
     
+    def hide_on_delete(self, widget, event):
+        widget.hide()
+        return True
+    
     # Adding simfiles
     
     def uri_to_path(self, uri):
