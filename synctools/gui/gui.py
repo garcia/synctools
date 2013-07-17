@@ -1,3 +1,4 @@
+﻿# -*- encoding: utf-8 -*-
 import codecs
 import glob
 import logging
@@ -40,7 +41,10 @@ class SynctoolsGUI:
     
     file_uri_target = 80
     path_strip = '\r\n\x00'
-    gladefile = os.path.join(os.path.dirname(__file__), 'synctools.glade')
+    gladefile = os.path.join(
+        os.path.dirname(__file__.decode(sys.getfilesystemencoding())),
+        'synctools.glade'
+    )
     
     def delete_event(self, widget, *args):
         gtk.main_quit()
