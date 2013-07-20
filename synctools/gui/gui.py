@@ -33,6 +33,8 @@ class GtkTextViewHandler(logging.Handler):
             fs  = "%s\n"
             self.tbf.insert(self.tbf.get_end_iter(), fs % msg)
             self.tv.scroll_mark_onscreen(self.tbf.get_insert())
+            while gtk.events_pending():
+                gtk.main_iteration_do(False)
         except:
             self.handleError(record)
 
@@ -53,6 +55,14 @@ class SynctoolsGUI:
     def hide_on_delete(self, widget, event):
         widget.hide()
         return True
+    
+    # Logging
+    
+    def error_to_output_window(self):
+        tb_lines = traceback.format_exc().splitlines()
+        for line in tb_lines[:-1]:
+            self.log.debug(line)
+        self.log.error(tb_lines[-1])
     
     # Adding simfiles
     
@@ -95,6 +105,8 @@ class SynctoolsGUI:
                         break
             simfile_list.append([metadata['TITLE'], metadata['ARTIST'],
                                   metadata['CREDIT'], path])
+            while gtk.events_pending():
+                gtk.main_iteration_do(False)
     
     def drag_files(self, widget, context, x, y, selection, target_type, timestamp):
         if target_type == SynctoolsGUI.file_uri_target:
@@ -117,11 +129,9 @@ class SynctoolsGUI:
     
     def choose_simfiles_response(self, dialog, response):
         dialog.hide()
-        # Anything but the Open button was pressed
-        if response != 1:
-            return
-        # Open button was pressed
-        self.add_simfiles(dialog.get_filenames())
+        # Was the Open button pressed?
+        if response == 1:
+            self.add_simfiles(dialog.get_filenames())
     
     # About dialog
     
@@ -174,7 +184,9 @@ class SynctoolsGUI:
                 options[field] = widget.get_text()
         
         # Create output window
-        self.glade.get_object('output').show_all()
+        output_window = self.glade.get_object('output')
+        output_window.show_all()
+        output_window.present()
         self.log.debug(str(options))
         
         # Process the simfiles
@@ -182,14 +194,13 @@ class SynctoolsGUI:
         try:
             command_instance = Command(options)
         except Exception:
-            self.log.error(traceback.format_exc().splitlines()[-1])
+            self.error_to_output_window()
+            return
         for item in simfile_list:
-            while gtk.events_pending():
-                gtk.main_iteration_do(False)
             try:
                 command_instance.run(Simfile(item[-1]))
             except Exception:
-                self.log.error(traceback.format_exc().splitlines()[-1])
+                self.error_to_output_window()
         command_instance.done()
         self.log.info('')
     
@@ -211,7 +222,7 @@ class SynctoolsGUI:
         
         # Set up logging
         self.log = logging.getLogger('synctools')
-        self.log.setLevel(logging.INFO)
+        self.log.setLevel(logging.DEBUG)
         self.log.addHandler(GtkTextViewHandler(
             self.glade.get_object('output_textview')
         ))
