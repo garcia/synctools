@@ -23,7 +23,7 @@ class AdjustOffset(command.SynctoolsCommand):
     def run(self, simfile):
         super(AdjustOffset, self).run(simfile)
         old_offset = simfile['OFFSET']
-        new_offset = Decimal(old_offset) + Decimal(self.options['amount'])
+        new_offset = Decimal(old_offset) + self.options['amount']
         self.log.info('%s -> %s' % (old_offset, new_offset))
         simfile['OFFSET'] = new_offset
         simfile.save()

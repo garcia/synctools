@@ -32,6 +32,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.</property>
+    <signal name="delete-event" handler="hide_on_delete" swapped="no"/>
     <signal name="response" handler="about_response" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox2">
@@ -65,6 +66,7 @@ THE SOFTWARE.</property>
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <property name="select_multiple">True</property>
+    <signal name="delete-event" handler="hide_on_delete" swapped="no"/>
     <signal name="response" handler="choose_simfiles_response" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
@@ -137,6 +139,7 @@ THE SOFTWARE.</property>
   <object class="GtkWindow" id="output">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Script output</property>
+    <signal name="delete-event" handler="hide_on_delete" swapped="no"/>
     <child>
       <object class="GtkVBox" id="output_vbox">
         <property name="visible">True</property>
