@@ -1,4 +1,4 @@
 __author__ = 'Grant Garcia'
 __copyright__ = 'Copyright 2013, Grant Garcia'
 __license__ = 'MIT'
-__version__ = '0.8.0'
+__version__ = '0.9.0'
