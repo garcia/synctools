@@ -13,7 +13,7 @@ Contents:
 
    synctools
    commands
-   interfaces
+   gimmickbuilder
 
 
 Indices and tables

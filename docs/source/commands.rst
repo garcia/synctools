@@ -33,7 +33,7 @@ GimmickBuilder
 
 Converts a gimmicks.txt file in the same directory as the .sm file into BPM changes and stops.
 
-Syntax details are forthcoming.
+Use the "Create gimmicks.txt skeleton" option to generate a template with the current version declaration. Refer to the :doc:`gimmickbuilder` page for further details.
 
 Patch
 -----
