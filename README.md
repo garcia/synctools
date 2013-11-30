@@ -9,7 +9,7 @@ Requirements
 * Python 2.6+
 * [PyYAML](http://pyyaml.org/)
 * [PyGTK](http://www.pygtk.org/) and its dependencies
-* [simfile](https://github.com/grantgarcia/simfile) 1.0+
+* [simfile](https://github.com/garcia/simfile) 1.0+
 
 Windows builds
 --------------
