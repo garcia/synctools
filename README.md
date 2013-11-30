@@ -14,4 +14,4 @@ Requirements
 Windows builds
 --------------
 
-Windows builds are available [here](http://grantgarcia.org/synctools/) and should have no dependencies other than the [Microsoft Visual C++ 2008 Redistributable Package](http://www.microsoft.com/en-us/download/details.aspx?id=29).
+Windows builds are available [here](http://grantgarcia.org/synctools/builds/) and should have no dependencies other than the [Microsoft Visual C++ 2008 Redistributable Package](http://www.microsoft.com/en-us/download/details.aspx?id=29).
