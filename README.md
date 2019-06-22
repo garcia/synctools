@@ -14,4 +14,6 @@ Requirements
 Windows builds
 --------------
 
-Windows builds are available [here](http://grantgarcia.org/synctools/builds/) and should have no dependencies other than the [Microsoft Visual C++ 2008 Redistributable Package](http://www.microsoft.com/en-us/download/details.aspx?id=29).
+Download: [synctools-0.9.0.zip](https://garcia.sh/synctools/builds/synctools-0.9.0.zip)
+
+You may need to install the [Microsoft Visual C++ 2008 Redistributable Package](http://www.microsoft.com/en-us/download/details.aspx?id=29) as well.
