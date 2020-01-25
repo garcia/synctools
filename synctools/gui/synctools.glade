@@ -8,12 +8,12 @@
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">synctools</property>
-    <property name="copyright" translatable="yes">© Grant Garcia 2013</property>
-    <property name="website">https://github.com/grantgarcia/synctools</property>
+    <property name="copyright" translatable="yes">© Ash Garcia 2013</property>
+    <property name="website">https://github.com/garcia/synctools</property>
     <property name="website_label" translatable="yes">synctools on GitHub</property>
     <property name="license" translatable="yes">The MIT License (MIT)
 
-Copyright © 2013 Grant Garcia
+Copyright © 2013 Ash Garcia
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
